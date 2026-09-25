@@ -1,0 +1,19 @@
+{
+  "overview": "Aplikasi kasir dan penjualan untuk Toko Madanigsih Stationery dengan master barang, transaksi penjualan, struk, dan laporan laba rugi.",
+  "features": [
+    "Kelola master barang: nama, ukuran, harga pokok, dan stok",
+    "Cari dan edit barang dengan cepat",
+    "Catat penjualan dengan stok otomatis berkurang",
+    "Cetak struk dan kirim ke WhatsApp",
+    "Laporan laba rugi dan grafik keuntungan per bulan"
+  ],
+  "category": "point-of-sale",
+  "tags": [
+    "penjualan",
+    "kasir",
+    "toko",
+    "laporan",
+    "inventaris"
+  ],
+  "last_updated": "2026-09-25T09:38:25.429Z"
+}

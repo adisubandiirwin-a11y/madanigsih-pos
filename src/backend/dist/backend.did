@@ -1,0 +1,202 @@
+type YearlyProfit = 
+ record {
+   months: vec MonthlyProfit;
+   totalLaba: int;
+   year: Year;
+ };
+type Year = nat;
+type Value = 
+ variant {
+   "bool": bool;
+   float: float64;
+   "int": int;
+   "nat": nat;
+   "null";
+   "text": text;
+ };
+type UserRole = 
+ variant {
+   admin;
+   guest;
+   user;
+ };
+type Timestamp = nat;
+type SaleView = 
+ record {
+   createdAt: Timestamp;
+   id: SaleId;
+   lines: vec SaleLine;
+   tanggal: IsoDate;
+   total: Rupiah;
+ };
+type SaleLine = 
+ record {
+   hargaJual: Rupiah;
+   hargaPokok: Rupiah;
+   itemId: opt ItemId;
+   jumlah: Rupiah;
+   manual: bool;
+   namaBarang: text;
+   qtyOrder: Qty;
+   ukuran: text;
+ };
+type SaleId = nat;
+type Rupiah = nat;
+type Result__1 = 
+ variant {
+   err: Error;
+   ok;
+ };
+type Result = 
+ record {
+   hasMore: bool;
+   rows: vec vec Cell;
+ };
+type Qty = nat;
+type ProfitSummary = 
+ record {
+   rows: vec ProfitRow;
+   totalLaba: int;
+   untung: bool;
+ };
+type ProfitRow = 
+ record {
+   hargaJual: Rupiah;
+   hargaPokok: Rupiah;
+   laba: int;
+   namaBarang: text;
+   qtyOrder: Qty;
+   saleId: SaleId;
+   tanggal: IsoDate;
+   ukuran: text;
+ };
+type NewSaleLine = 
+ record {
+   hargaJual: Rupiah;
+   hargaPokok: opt Rupiah;
+   itemId: opt ItemId;
+   namaBarang: opt text;
+   qtyOrder: Qty;
+   ukuran: opt text;
+ };
+type NewSale = 
+ record {
+   lines: vec NewSaleLine;
+   tanggal: IsoDate;
+ };
+type NewItem = 
+ record {
+   hargaPokok: Rupiah;
+   namaBarang: text;
+   stockMaster: Qty;
+   ukuran: text;
+ };
+type MonthlyProfit = 
+ record {
+   laba: int;
+   month: Month;
+ };
+type Month = nat;
+type ItemView = 
+ record {
+   createdAt: Timestamp;
+   hargaPokok: Rupiah;
+   id: ItemId;
+   namaBarang: text;
+   stockMaster: Qty;
+   ukuran: text;
+   updatedAt: Timestamp;
+ };
+type ItemId = nat;
+type ItemEdit = 
+ record {
+   hargaPokok: Rupiah;
+   ukuran: text;
+ };
+type IsoDate = text;
+type Error = 
+ variant {
+   AmbiguousAttribute: record {
+                         field: text;
+                         sources: vec text;
+                       };
+   FrontendOriginMismatch: record {
+                             expected: vec text;
+                             got: text;
+                           };
+   FrontendOriginsNotConfigured;
+   MalformedCandid;
+   MissingField: text;
+   MixedSsoSources: record {
+                      otherKeys: vec text;
+                      ssoKeys: vec text;
+                    };
+   NoAttributes;
+   Stale: record {ageNs: nat;};
+   UnknownNonce;
+   UntrustedSsoSource: record {domain: text;};
+ };
+type Cell = 
+ record {
+   name: text;
+   value: Value;
+ };
+type AppResult_1 = 
+ variant {
+   err: AppError;
+   ok: SaleView;
+ };
+type AppResult = 
+ variant {
+   err: AppError;
+   ok: ItemView;
+ };
+type AppError = 
+ variant {
+   emptyField: text;
+   emptyOrder;
+   insufficientStock: record {
+                        available: Qty;
+                        itemId: ItemId;
+                        requested: Qty;
+                      };
+   invalidDate: text;
+   invalidNumber: text;
+   itemNotFound: ItemId;
+   saleNotFound: SaleId;
+ };
+service : {
+  _initialize_access_control: () -> ();
+  _internet_identity_sign_in_finish: () -> (Result__1);
+  _internet_identity_sign_in_start: () -> (blob);
+  assignCallerUserRole: (user: principal, role: UserRole) -> ();
+  /// Create a master barang. Requires a signed-in caller.
+  createItem: (input: NewItem) -> (AppResult);
+  execute: (qJson: text) -> (Result) query;
+  /// Static Markdown documentation of this backend's public API.
+  getApiDoc: () -> (text) query;
+  getCallerUserRole: () -> (UserRole) query;
+  /// Fetch one master barang. Requires a signed-in caller.
+  getItem: (id: ItemId) -> (opt ItemView) query;
+  /// Monthly profit series for a year, ordered January..December.
+  /// Requires a signed-in caller.
+  getMonthlyProfit: (year: Year) -> (YearlyProfit) query;
+  /// Profit/loss report rows and totals, optionally filtered by year and month.
+  /// Requires a signed-in caller.
+  getProfitReport: (year: opt Year, month: opt Month) ->
+   (ProfitSummary) query;
+  /// Fetch one penjualan with its lines. Requires a signed-in caller.
+  getSale: (id: SaleId) -> (opt SaleView) query;
+  isCallerAdmin: () -> (bool) query;
+  /// List every master barang. Requires a signed-in caller.
+  listItems: () -> (vec ItemView) query;
+  /// List every penjualan, newest first. Requires a signed-in caller.
+  listSales: () -> (vec SaleView) query;
+  /// Save a penjualan and decrement Stock Master. Requires a signed-in caller.
+  saveSale: (input: NewSale) -> (AppResult_1);
+  schema: () -> (text) query;
+  /// Search master barang by name (case-insensitive substring). Requires a signed-in caller.
+  searchItems: (term: text) -> (vec ItemView) query;
+  /// Edit a master barang's `ukuran` and `hargaPokok`. Requires a signed-in caller.
+  updateItem: (id: ItemId, edit: ItemEdit) -> (AppResult);
+}
